@@ -18,5 +18,6 @@ from cms_templates import views
 
 urlpatterns = [
     url(r'^$',views.barra, name="Pagina Principal"),
+    url(r'^(.+)', views.recurso, name="Ofrece el contenido del recurso"),
     url(r'^admin/', include(admin.site.urls)),
 ]

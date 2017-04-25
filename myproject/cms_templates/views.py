@@ -36,4 +36,43 @@ def barra(request):
                 + "<input type='submit' value='Enviar'></form>"
             return HttpResponse(bodyHtml)
         elif request.method == 'POST':
-            
+            recurso = request.POST['name']
+            contenido = request.POST['page']
+            pagina = Pages(nombreRec=recurso, contenido=contenido)
+            pagina.save()
+            return HttpResponse("Has realizado un POST con el nombre de recurso " \
+                + recurso)
+        else:
+            return HttpResponseBadRequest("Operacion No Soportada")
+    else:
+        if request.method == 'GET':
+            bodyHtml = printAll(bodyHtml)
+            return HttpResponse(bodyHtml)
+        else:
+            return HttpResponseBadRequest("Operacion No Soportada")
+
+def recurso(request, nombreRec):
+    logged, bodyHtml = logeado(request)
+    if logged:
+        if request.method == 'GET':
+            try:
+                contenido = Pages.objects.get(nombreRec=nombreRec)
+                bodyHtml = bodyHtml + contenido
+                return HttpResponse(bodyHtml)
+            except Pages.DoesNotExist:
+                return HttpResponseBadRequest("No existe pagina para " + nombreRec)
+        elif request.method == 'PUT':
+            try:
+                contenido = Pages
+        else:
+            return HttpResponseBadRequest("Operacion No Soportada")
+    else:
+        if request.method == 'GET':
+            try:
+                contenido = Pages.objects.get(nombreRec=nombreRec)
+                bodyHtml = bodyHtml + contenido
+                return HttpResponse(bodyHtml)
+            except Pages.DoesNotExist:
+                return HttpResponseBadRequest("No existe pagina para " + nombreRec)
+        else:
+            return HttpResponseBadRequest("Operacion No Soportada")
