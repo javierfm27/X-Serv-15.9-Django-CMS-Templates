@@ -18,6 +18,8 @@ from cms_templates import views
 
 urlpatterns = [
     url(r'^$',views.barra, name="Pagina Principal"),
-    url(r'^(.+)', views.recurso, name="Ofrece el contenido del recurso"),
+    url(r'^logout$', views.myLogout, name="Hace Un Logout del usuario actual"),
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^annotated/(.+)', views.plantilla, name="Sirve el contenido pero con plantilla"),
+    url(r'^(.+)', views.recurso, name="Ofrece el contenido del recurso"),
 ]

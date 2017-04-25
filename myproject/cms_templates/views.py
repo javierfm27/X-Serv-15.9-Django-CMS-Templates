@@ -1,6 +1,10 @@
 from django.shortcuts import render
 from django.http import *
+from django.contrib.auth import logout
 from cms_templates.models import Pages
+from django.views.decorators.csrf import csrf_exempt
+from django.template.loader import get_template
+from django.template import Context
 
 def logeado(request):
     if request.user.is_authenticated():
@@ -21,6 +25,7 @@ def printAll(body):
     return body
 
 # Create your views here.
+@csrf_exempt
 def barra(request):
     logged, bodyHtml = logeado(request)
     if logged:
@@ -51,19 +56,30 @@ def barra(request):
         else:
             return HttpResponseBadRequest("Operacion No Soportada")
 
+def myLogout(request):
+    logout(request)
+    return HttpResponse("HA SIDO DESCONECTADO")
+
+
+@csrf_exempt
 def recurso(request, nombreRec):
     logged, bodyHtml = logeado(request)
     if logged:
         if request.method == 'GET':
             try:
-                contenido = Pages.objects.get(nombreRec=nombreRec)
-                bodyHtml = bodyHtml + contenido
+                pagina = Pages.objects.get(nombreRec=nombreRec)
+                bodyHtml = bodyHtml + pagina.contenido
                 return HttpResponse(bodyHtml)
             except Pages.DoesNotExist:
-                return HttpResponseBadRequest("No existe pagina para " + nombreRec)
+                return HttpResponseNotFound("No existe pagina para " + nombreRec)
         elif request.method == 'PUT':
             try:
-                contenido = Pages
+                pagina = Pages.objects.get(nombreRec=nombreRec)
+                pagina.contenido = request.body.decode('utf-8')
+                pagina.save()
+                return HttpResponse("Se ha actualizado el recurso " + nombreRec)
+            except Pages.DoesNotExist:
+                return HttpResponseNotFound("No se encuentra el recurso")
         else:
             return HttpResponseBadRequest("Operacion No Soportada")
     else:
@@ -73,6 +89,13 @@ def recurso(request, nombreRec):
                 bodyHtml = bodyHtml + contenido
                 return HttpResponse(bodyHtml)
             except Pages.DoesNotExist:
-                return HttpResponseBadRequest("No existe pagina para " + nombreRec)
+                return HttpResponseNotFound("No existe pagina para " + nombreRec)
         else:
             return HttpResponseBadRequest("Operacion No Soportada")
+
+@csrf_exempt
+def plantilla(request, recurso):
+    pagina = Pages.objects.get(nombreRec=recurso)
+    template = get_template("index.html")
+    c = Context({'title': 'Pagina de ' + recurso, 'content': pagina.contenido})
+    return HttpResponse(template.render(c))
