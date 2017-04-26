@@ -86,7 +86,7 @@ def recurso(request, nombreRec):
         if request.method == 'GET':
             try:
                 contenido = Pages.objects.get(nombreRec=nombreRec)
-                bodyHtml = bodyHtml + contenido
+                bodyHtml = bodyHtml + contenido.contenido
                 return HttpResponse(bodyHtml)
             except Pages.DoesNotExist:
                 return HttpResponseNotFound("No existe pagina para " + nombreRec)
@@ -95,7 +95,8 @@ def recurso(request, nombreRec):
 
 @csrf_exempt
 def plantilla(request, recurso):
+    logged, bodyHtml = logeado(request)
     pagina = Pages.objects.get(nombreRec=recurso)
     template = get_template("index.html")
-    c = Context({'title': 'Pagina de ' + recurso, 'content': pagina.contenido})
+    c = Context({'title': 'Pagina de ' + recurso, 'content':  pagina.contenido, 'menulogin': bodyHtml})
     return HttpResponse(template.render(c))
